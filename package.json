@@ -8,6 +8,9 @@
     "url": "git+https://github.com/kiruthikraaj/envlayer.git"
   },
   "type": "module",
+  "bin": {
+    "envlayer": "./dist/cli.cjs"
+  },
   "sideEffects": false,
   "exports": {
     ".": {
@@ -31,7 +34,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsup src/index.ts src/register.ts --format esm,cjs --dts --clean --tsconfig tsconfig.build.json",
+    "build": "tsup src/index.ts src/register.ts src/cli.ts --format esm,cjs --dts --clean --tsconfig tsconfig.build.json",
     "test": "node --test",
     "bench": "npm run build && node bench/compare.mjs",
     "prepublishOnly": "npm run test && npm run build"
