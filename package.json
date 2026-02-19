@@ -33,10 +33,13 @@
   "scripts": {
     "build": "tsup src/index.ts src/register.ts --format esm,cjs --dts --clean --tsconfig tsconfig.build.json",
     "test": "node --test",
+    "bench": "npm run build && node bench/compare.mjs",
     "prepublishOnly": "npm run test && npm run build"
   },
   "devDependencies": {
     "@types/node": "^25.3.0",
+    "dotenv": "^17.3.1",
+    "dotenv-flow": "^4.1.0",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3"
   },

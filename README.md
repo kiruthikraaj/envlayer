@@ -17,6 +17,18 @@ envlayer:
 - Works with both ESM and CJS
 - Supports preload hook (-r envlayer/register)
 
+## Benchmarks
+
+Local benchmark (Node.js v22, 2000 iterations, 5 layered files: `.env.defaults`, `.env`, `.env.uat`, `.env.local`, `.env.uat.local`)
+
+| Loader | Avg time (ms/op) | Notes |
+| --- | ---: | --- |
+| envlayer | **0.0596** | convention-based layered loading |
+| dotenv-flow | 0.0688 | layered loading support |
+| dotenv (manual layering) | 0.1193 | multiple `dotenv.config()` calls |
+
+> Benchmarks measure repeated load+parse+apply cycles. Real apps typically run env loading once at startup, but relative performance still reflects parser + merge overhead.
+
 ## Installation
 
 ```bash
