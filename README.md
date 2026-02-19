@@ -35,6 +35,35 @@ Local benchmark (Node.js v22, 2000 iterations, 5 layered files: `.env.defaults`,
 npm install envlayer
 ```
 
+## CLI Runner
+
+Run any command after loading the right `.env*` layers.
+
+```bash
+npx envlayer --env=uat --cwd . -- node dist/main.js
+```
+
+### Flags
+
+- -e, --env <name>: environment name (e.g. development, uat, production)
+- --cwd, --dir <path>: directory to look for .env* files (default: current working directory)
+- -q, --quiet: silence logs
+- -v, --verbose: verbose logs
+- --debug: debug logs
+- --override: overwrite existing process.env keys
+- --warn-missing: show missing env files
+- -h, --help: show help
+
+### Examples
+
+```bash
+# Load env then run node
+npx envlayer --env=uat --cwd ./config -- node dist/main.js
+
+# Inline command
+npx envlayer --env=development -- node -e "console.log(process.env.MY_KEY)"
+```
+
 ## Quick Start (Preload Hook)
 
 ```ts

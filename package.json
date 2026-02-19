@@ -35,7 +35,7 @@
   ],
   "scripts": {
     "build": "tsup src/index.ts src/register.ts src/cli.ts --format esm,cjs --dts --clean --tsconfig tsconfig.build.json",
-    "test": "node --test",
+    "test": "npm run build && node --test",
     "bench": "npm run build && node bench/compare.mjs",
     "prepublishOnly": "npm run test && npm run build"
   },
