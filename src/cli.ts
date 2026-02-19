@@ -39,7 +39,32 @@ function parseArgs(argv: string[]) {
     return undefined;
   };
 
+  const getMultiFlag = (long: string, short?: string) => {
+    const out: string[] = [];
+
+    // --require=DB_URL
+    for (const a of envlayerArgs) {
+      if (a.startsWith(`${long}=`)) out.push(a.slice(long.length + 1));
+      if (short && a.startsWith(`${short}=`))
+        out.push(a.slice(short.length + 1));
+    }
+
+    // --require DB_URL  (repeatable)
+    for (let i = 0; i < envlayerArgs.length; i++) {
+      const a = envlayerArgs[i];
+      if (a === long || (short && a === short)) {
+        const v = envlayerArgs[i + 1];
+        const isKey = (s: string) => /^[A-Z0-9_]+$/i.test(s);
+        if (v && v !== "--" && isKey(v)) out.push(v);
+      }
+    }
+
+    return Array.from(new Set(out.filter(Boolean)));
+  };
+
   const help = hasFlag("--help", "-h");
+
+  const required = getMultiFlag("--require", "-r");
 
   const env = getFlag("--env", "-e") ?? getFlag("--environment");
   const cwd = getFlag("--cwd") ?? getFlag("--dir");
@@ -68,6 +93,7 @@ function parseArgs(argv: string[]) {
       overrideProcessEnv: override,
       allowLocalInProduction,
       warnOnMissing: warnMissing,
+      required,
     } as const,
     cmdArgs,
     help,
@@ -80,11 +106,12 @@ function main() {
   if (help) {
     console.log(`envlayer (runner)
 Usage:
-  envlayer --env <name> [--cwd <dir>] [--quiet|--verbose|--debug] [--override] [--warn-missing] -- <command...>
+  envlayer --env <name> [--cwd <dir>] [--require/-r <KEY>] [--quiet|--verbose|--debug] [--override] [--warn-missing] -- <command...>
 
 Examples:
   envlayer --env=uat --cwd . -- node dist/main.js
   envlayer --env=production --quiet -- node dist/main.js
+  envlayer --env=production --require DB_URL --require PORT -- node dist/main.js
 `);
     process.exit(0);
   }
@@ -92,14 +119,29 @@ Examples:
   const resolvedCwd = options.cwd ? path.resolve(options.cwd) : undefined;
 
   // Load env first
-  loadEnv({
-    env: options.env,
-    cwd: resolvedCwd,
-    logLevel: options.logLevel,
-    overrideProcessEnv: options.overrideProcessEnv,
-    allowLocalInProduction: options.allowLocalInProduction,
-    warnOnMissing: options.warnOnMissing,
-  });
+  try {
+    loadEnv({
+      env: options.env,
+      cwd: resolvedCwd,
+      logLevel: options.logLevel,
+      overrideProcessEnv: options.overrideProcessEnv,
+      allowLocalInProduction: options.allowLocalInProduction,
+      warnOnMissing: options.warnOnMissing,
+      required: options.required,
+      throwOnError: true,
+    });
+  } catch (e: any) {
+    // loadEnv already printed safe errors via logger; avoid stack traces here
+    const msg = String(e?.message ?? e ?? "");
+    if (
+      options.logLevel !== "silent" &&
+      msg &&
+      msg !== "envlayer validation failed"
+    ) {
+      console.error(`[envlayer] ${msg}`);
+    }
+    process.exit(1);
+  }
 
   // If no command provided, just exit successfully
   if (!cmdArgs.length) process.exit(0);

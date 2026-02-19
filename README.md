@@ -47,6 +47,7 @@ npx envlayer --env=uat --cwd . -- node dist/main.js
 
 - -e, --env <name>: environment name (e.g. development, uat, production)
 - --cwd, --dir <path>: directory to look for .env* files (default: current working directory)
+- -r, --require <KEY>: require env key (repeatable)
 - -q, --quiet: silence logs
 - -v, --verbose: verbose logs
 - --debug: debug logs
@@ -62,6 +63,8 @@ npx envlayer --env=uat --cwd ./config -- node dist/main.js
 
 # Inline command
 npx envlayer --env=development -- node -e "console.log(process.env.MY_KEY)"
+
+npx envlayer --env=production --require DB_URL --require PORT -- node dist/main.js
 ```
 
 ## Quick Start (Preload Hook)
